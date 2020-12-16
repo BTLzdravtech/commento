@@ -1,5 +1,5 @@
 # backend build (api server)
-FROM golang:1.14-alpine AS api-build
+FROM golang:1.15-alpine AS api-build
 RUN apk add --no-cache --update bash dep make git curl g++
 
 ARG RELEASE=prod
@@ -9,7 +9,7 @@ RUN make ${RELEASE} -j$(($(nproc) + 1))
 
 
 # frontend build (html, js, css, images)
-FROM node:10-alpine AS frontend-build
+FROM node:12-alpine AS frontend-build
 RUN apk add --no-cache --update bash make python2 g++
 
 ARG RELEASE=prod
@@ -19,7 +19,7 @@ RUN make ${RELEASE} -j$(($(nproc) + 1))
 
 
 # templates and db build
-FROM alpine:3.9 AS templates-db-build
+FROM alpine:3.12 AS templates-db-build
 RUN apk add --no-cache --update bash make
 
 ARG RELEASE=prod
@@ -33,7 +33,7 @@ RUN make ${RELEASE} -j$(($(nproc) + 1))
 
 
 # final image
-FROM alpine:3.7
+FROM alpine:3.12
 RUN apk add --no-cache --update ca-certificates
 
 ARG RELEASE=prod
