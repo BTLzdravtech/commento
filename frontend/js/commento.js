@@ -432,6 +432,7 @@
 
     attrSet(a, "href", "https://commento.io");
     attrSet(a, "target", "_blank");
+    attrSet(a, "rel", "noopener");
 
     text.innerText = "Commento";
 
