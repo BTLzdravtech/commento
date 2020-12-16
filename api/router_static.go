@@ -21,6 +21,7 @@ type staticPlugs struct {
 }
 
 var asset map[string][]byte = make(map[string][]byte)
+var compressedAsset map[string][]byte = make(map[string][]byte)
 var contentType map[string]string = make(map[string]string)
 var footer string
 var compress bool
@@ -52,7 +53,7 @@ func footerInit() error {
 	return nil
 }
 
-func fileLoad(f string) ([]byte, error) {
+func fileLoad(f string, compress bool) ([]byte, error) {
 	b, err := fileDetemplate(f)
 	if err != nil {
 		logger.Errorf("cannot load file %s: %v", f, err)
@@ -70,6 +71,7 @@ func staticRouterInit(router *mux.Router) error {
 	var err error
 
 	subdir := pathStrip(os.Getenv("ORIGIN"))
+	compress := (os.Getenv("GZIP_STATIC") == "true")
 
 	if err = footerInit(); err != nil {
 		logger.Errorf("error initialising static router: %v", err)
@@ -85,10 +87,19 @@ func staticRouterInit(router *mux.Router) error {
 
 		for _, file := range files {
 			f := dir + "/" + file.Name()
-			asset[subdir+f], err = fileLoad(os.Getenv("STATIC") + f)
+
+			asset[subdir+f], err = fileLoad(os.Getenv("STATIC")+f, false)
 			if err != nil {
 				logger.Errorf("cannot detemplate %s%s: %v", os.Getenv("STATIC"), f, err)
 				return err
+			}
+
+			if compress {
+				compressedAsset[subdir+f], err = fileLoad(os.Getenv("STATIC")+f, true)
+				if err != nil {
+					logger.Errorf("cannot detemplate %s%s: %v", os.Getenv("STATIC"), f, err)
+					return err
+				}
 			}
 		}
 	}
@@ -108,10 +119,19 @@ func staticRouterInit(router *mux.Router) error {
 
 	for _, page := range pages {
 		f := page + ".html"
-		asset[subdir+page], err = fileLoad(os.Getenv("STATIC") + f)
+
+		asset[subdir+page], err = fileLoad(os.Getenv("STATIC")+f, false)
 		if err != nil {
 			logger.Errorf("cannot detemplate %s%s: %v", os.Getenv("STATIC"), f, err)
 			return err
+		}
+
+		if compress {
+			compressedAsset[subdir+page], err = fileLoad(os.Getenv("STATIC")+f, true)
+			if err != nil {
+				logger.Errorf("cannot detemplate %s%s: %v", os.Getenv("STATIC"), f, err)
+				return err
+			}
 		}
 	}
 
@@ -124,10 +144,12 @@ func staticRouterInit(router *mux.Router) error {
 
 		router.HandleFunc(p, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", contentType[r.URL.Path])
-			if compress {
+			if compress && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 				w.Header().Set("Content-Encoding", "gzip")
+				w.Write(compressedAsset[r.URL.Path])
+			} else {
+				w.Write(asset[r.URL.Path])
 			}
-			w.Write(asset[r.URL.Path])
 		})
 	}
 
