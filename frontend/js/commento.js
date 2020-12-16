@@ -351,6 +351,7 @@
       avatar = create("img");
       attrSet(avatar, "src", cdn + "/api/commenter/photo?commenterHex=" + commenter.commenterHex);
       attrSet(avatar, "loading", "lazy");
+      attrSet(avatar, "alt", "User avatar");
       classAdd(avatar, "avatar-img");
     }
 
