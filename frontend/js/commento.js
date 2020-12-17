@@ -40,8 +40,6 @@
   var ID_TEXTAREA_CONTAINER = "commento-textarea-container-";
   var ID_TEXTAREA = "commento-textarea-";
   var ID_ANONYMOUS_CHECKBOX = "commento-anonymous-checkbox-";
-  var ID_GUEST_DETAILS = "commento-guest-details-";
-  var ID_GUEST_DETAILS_INPUT = "commento-guest-details-input-";
   var ID_SORT_POLICY = "commento-sort-policy-";
   var ID_CARD = "commento-comment-card-";
   var ID_BODY = "commento-comment-body-";
@@ -590,17 +588,6 @@
     remove(markdownHelp);
   }
 
-  function checkAnonymous(id) {
-    var guestDetails = $(ID_GUEST_DETAILS + id);
-    var anonCheckbox = $(ID_ANONYMOUS_CHECKBOX + id);
-
-    if (anonCheckbox.checked) {
-      classRemove(guestDetails, "make-invisible");
-    } else {
-      classAdd(guestDetails, "make-invisible");
-    }
-  }
-
 
   function textareaCreate(id, edit) {
     var textareaSuperContainer = create("div");
@@ -611,14 +598,10 @@
     var anonymousCheckboxLabel = create("label");
     var submitButton = create("button");
     var markdownButton = create("a");
-    var guestNameContainer = create("div");
-    var guestName = create("input");
 
     textareaSuperContainer.id = ID_SUPER_CONTAINER + id;
     textareaContainer.id = ID_TEXTAREA_CONTAINER + id;
     textarea.id = ID_TEXTAREA + id;
-    guestNameContainer.id = ID_GUEST_DETAILS + id;
-    guestName.id = ID_GUEST_DETAILS_INPUT + id;
     anonymousCheckbox.id = ID_ANONYMOUS_CHECKBOX + id;
     submitButton.id = ID_SUBMIT_BUTTON + id;
     markdownButton.id = ID_MARKDOWN_BUTTON + id;
@@ -630,15 +613,10 @@
     classAdd(submitButton, "submit-button");
     classAdd(markdownButton, "markdown-button");
     classAdd(textareaSuperContainer, "button-margin");
-    classAdd(guestName, "guest-details");
-    classAdd(guestNameContainer, "guest-details-container");
-    classAdd(guestNameContainer, "round-check");
 
     attrSet(textarea, "placeholder", i18n("Add a comment"));
     attrSet(anonymousCheckbox, "type", "checkbox");
     attrSet(anonymousCheckboxLabel, "for", ID_ANONYMOUS_CHECKBOX + id);
-    attrSet(guestName, "type", "text");
-    attrSet(guestName, "placeholder", i18n("Name (optional)"));
 
     anonymousCheckboxLabel.innerText = i18n("Comment anonymously");
     if (edit === true) {
@@ -651,10 +629,7 @@
     if (anonymousOnly) {
       anonymousCheckbox.checked = true;
       anonymousCheckbox.setAttribute("disabled", true);
-    } else {
-      classAdd(guestNameContainer, "make-invisible");
     }
-    onclick(anonymousCheckbox, checkAnonymous, id);
 
     textarea.oninput = autoExpander(textarea);
     if (edit === true) {
@@ -666,13 +641,11 @@
 
     append(textareaContainer, textarea);
     append(textareaSuperContainer, textareaContainer);
-    append(textareaSuperContainer, guestNameContainer);
     append(anonymousCheckboxContainer, anonymousCheckbox);
     append(anonymousCheckboxContainer, anonymousCheckboxLabel);
     append(textareaSuperContainer, submitButton);
     if (!requireIdentification && edit !== true) {
       append(textareaSuperContainer, anonymousCheckboxContainer);
-      append(guestNameContainer, guestName);
     }
     append(textareaSuperContainer, markdownButton);
 
@@ -816,7 +789,6 @@
 
     var json = {
       "commenterToken": commenterToken,
-      "anonName": $(ID_GUEST_DETAILS_INPUT + id).value,
       "domain": parent.location.host,
       "path": pageId,
       "parentHex": id,
@@ -845,11 +817,6 @@
       var commenterHex = selfHex;
       if (commenterHex === undefined || commenterToken === "anonymous") {
         commenterHex = "anonymous";
-      }
-      
-      if (commenterHex === "anonymous" && $(ID_GUEST_DETAILS_INPUT + id).value.trim().length > 0) {
-        commenterHex = id;
-        commenters[id] = { provider: "anon", name: $(ID_GUEST_DETAILS_INPUT + id).value.trim(), photo: "undefined", link: "" };
       }
 
       var comment = {
@@ -1101,9 +1068,6 @@
       classAdd(card, "card");
       if (isModerator && comment.state !== "approved") {
         classAdd(card, "dark-card");
-      }
-      if (commenter.provider === "anon") {
-        classAdd(name, "anonymous");
       }
       if (commenter.isModerator) {
         classAdd(name, "moderator");
