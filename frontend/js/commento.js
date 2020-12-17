@@ -1533,9 +1533,6 @@
     var cards = commentsRecurse(parentMap(comments), "root");
     if (cards) {
       append(commentsArea, cards);
-      if (MathJax) {
-        MathJax.typeset();
-      }
     }
   }
 
