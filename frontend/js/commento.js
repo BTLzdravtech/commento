@@ -2227,10 +2227,10 @@
           loadHash();
           allShow();
           nameWidthFix();
-          call(callback);
         });
       });
     });
+    call(callback);
   }
 
 
