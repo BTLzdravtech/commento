@@ -1964,7 +1964,7 @@
       if (order[i] === "password") {
         var fieldButton = create("button");
         classAdd(fieldButton, "email-button");
-        fieldButton.innerText = popupBoxType;
+        fieldButton.innerText = i18n(popupBoxType);
 
         if (popupBoxType === "signup") {
           onclick(fieldButton, global.signup, id);
