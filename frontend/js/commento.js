@@ -480,7 +480,7 @@
   function errorShow(text) {
     var el = $(ID_ERROR);
 
-    el.innerText = text;
+    el.innerText = i18n(text);
 
     attrSet(el, "style", "display: block;");
   }
@@ -904,7 +904,7 @@
     var elapsed = current - previous;
 
     if (elapsed < msJustNow) {
-      return "just now";
+      return i18n("just now");
     } else if (elapsed < msMinutesAgo) {
       return Math.round(elapsed / msPerSecond) + i18n(" seconds ago");
     } else if (elapsed < msHoursAgo) {
